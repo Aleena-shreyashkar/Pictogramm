@@ -18,12 +18,17 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     created_at: {
-        type: 'datetime'
+        time : { type : Date, default: Date.now }
     },
     updated_at: {
-        type: 'datetime'
+        time : { type : Date, default: Date.now }
+    }
+    },
+    {
+        collection:'User'
     }
     
-})
+)
 
-mongoose.model("User",userSchema)
+// export default userSchema;
+module.exports= userSchema;
