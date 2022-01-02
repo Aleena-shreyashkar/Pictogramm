@@ -5,8 +5,11 @@ const userSchema=require('../models/user')
 mongoose.model("User",userSchema)
 const User = mongoose.model("User");
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const {JWT_SECRET} = require('../config/keys');
+const requireLogin = require('../middleware/requireLogin')
 
-router.get('/',(req, res) => {
+router.get('/protected',requireLogin,(req, res) => {
     res.send("hello")
 })
 
@@ -72,7 +75,9 @@ router.post('/signin',(req, res) => {
                 res.status(402).json({error:"invalid email or password"})
             }
             else{
-                res.json({message:"succesfully signed in"})
+                // res.json({message:"succesfully signed in"})
+                const token = jwt.sign({_id:savedUser._id},JWT_SECRET)
+                res.json({token})
             }
         })
         .catch(err => {
