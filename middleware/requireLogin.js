@@ -6,8 +6,8 @@ mongoose.model("User",userSchema)
 const User = mongoose.model("User")
 
 module.exports = (req,res,next)=>{
-    const {autorization} = req.headers
-    if(!autorization){
+    const {authorization} = req.headers
+    if(!authorization){
         return res.status(401).json({error:"you must be logged in.."})
     }
     const token = authorization.replace("Bearer ","")
