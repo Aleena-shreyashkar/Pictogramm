@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema({
         type: 'string',
         required: true
     },
+    resetToken: String,
+    expireToken:Date,
     email_verified:{
         type: 'boolean',
         required: true

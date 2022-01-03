@@ -8,10 +8,22 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {JWT_SECRET} = require('../config/keys');
 const requireLogin = require('../middleware/requireLogin')
+const nodemailer = require('nodemailer')
+const sendgridTransport = require('nodemailer-sendgrid-transport')
+const crypto = require('crypto');
+const { route } = require('express/lib/router');
+const transporter = nodemailer.createTransport(sendgridTransport({
+    auth:{
+        api_key:"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"
+    }
+
+}))
+
 
 router.get('/protected',requireLogin,(req, res) => {
     res.send("hello")
 })
+
 
 router.post('/signup',(req, res) => {
     const {username,email,password} = req.body;
@@ -39,7 +51,9 @@ router.post('/signup',(req, res) => {
                 username,
                 email,
                 password:hashedpassword,
-                email_verified:true
+                email_verified:true,
+                created_at: Date.now(),
+                updated_at: Date.now()
             })
     
             user.save()
@@ -83,6 +97,57 @@ router.post('/signin',(req, res) => {
         .catch(err => {
             console.log(err)
         })
+    })
+})
+
+
+router.post('/reset-password',(req,res)=>{
+   crypto.randomBytes(32,(err,buffer)=>{
+       if(err){
+           console.log(err)
+       }
+       const token = buffer.toString("hex")
+       User.findOne({email:req.body.email})
+       .then(user => {
+           if(!user){
+               return res.status(422).json({error:"User doesnt exist"})
+           }
+           user.resetToken = token
+           user.expireToken = Date.now()+3600000
+           user.save().then((result)=>{
+               transporter.sendMail({
+                   to:user.email,
+                   from:"no-reply@picto.com",
+                   subject:"Password-reset",
+                   html:`
+                   <p> you requested for password reset</p>
+                   <h5> Click on this <a href="http://localhost:5000/reset/${token}">Link</a> to reset password</h5>`  
+               })
+               res.json({message:"Check your email"})
+           })
+       })
+   })
+})
+
+
+router.post('/new-password',(req,res)=>{
+    const newPassword = req.body.password
+    const sentToken = req.body.token
+    User.findOne({resetToken:sentToken,expireToken:{$gt:Date.now()}})
+    .then(user => {
+        if(!user){
+            return res.status(422).json({err:"Session expired. Try again"})
+        }
+        bcrypt.hash(newPassword,12).then(hashedpassword=>{
+            user.password = hashedpassword
+            user.resetToken = undefined
+            user.expireToken = undefined
+            user.save().then((savedUser)=>{
+                res.json({message:"password changed successfully"})
+            })
+        })
+    }).catch((err)=>{
+        console.log(err)
     })
 })
 
