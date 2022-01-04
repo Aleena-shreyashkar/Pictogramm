@@ -64,7 +64,7 @@ router.post('/signup',(req, res) => {
     })
 })
 
-
+// saving user after successful activation
 router.post('/email-activate',(req, res)=>{
     const {token} = req.body;
     if(token){
@@ -100,7 +100,7 @@ router.post('/email-activate',(req, res)=>{
     }
 })
 
-
+// User Signin
 router.post('/signin',(req, res) => {
     const {email,password} =req.body
     if(!email || !password) {
@@ -129,7 +129,7 @@ router.post('/signin',(req, res) => {
     })
 })
 
-
+// Reset Password
 router.post('/reset-password',(req,res)=>{
    crypto.randomBytes(32,(err,buffer)=>{
        if(err){
@@ -144,6 +144,7 @@ router.post('/reset-password',(req,res)=>{
            user.resetToken = token
            user.expireToken = Date.now()+3600000
            user.save().then((result)=>{
+            //    send reset email using mailgun
             const data = {
                 from: 'no.reply.picto@gmail.com',
                 to: user.email,
@@ -164,7 +165,7 @@ router.post('/reset-password',(req,res)=>{
    })
 })
 
-
+// Updating new password
 router.post('/new-password',(req,res)=>{
     const newPassword = req.body.password
     const sentToken = req.body.token
@@ -173,6 +174,7 @@ router.post('/new-password',(req,res)=>{
         if(!user){
             return res.status(422).json({err:"Session expired. Try again"})
         }
+        // updating password
         bcrypt.hash(newPassword,12).then(hashedpassword=>{
             user.password = hashedpassword
             user.resetToken = undefined
