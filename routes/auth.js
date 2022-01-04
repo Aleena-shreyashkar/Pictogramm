@@ -6,25 +6,20 @@ mongoose.model("User",userSchema)
 const User = mongoose.model("User");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {JWT_SECRET} = require('../config/keys');
+const {JWT_SECRET,Mailgun_API_Key,JWT_ACC_Activate} = require('../config/keys');
 const requireLogin = require('../middleware/requireLogin')
-const nodemailer = require('nodemailer')
-const sendgridTransport = require('nodemailer-sendgrid-transport')
+const mailgun = require("mailgun-js");
+const DOMAIN = 'sandbox2c4f3404967c42728455654bc7dc7790.mailgun.org';
+const mg = mailgun({apiKey: Mailgun_API_Key, domain: DOMAIN});
 const crypto = require('crypto');
 const { route } = require('express/lib/router');
-const transporter = nodemailer.createTransport(sendgridTransport({
-    auth:{
-        api_key:"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"
-    }
-
-}))
 
 
 router.get('/protected',requireLogin,(req, res) => {
     res.send("hello")
 })
 
-
+//signup, check if user already exists, if not then send activation email
 router.post('/signup',(req, res) => {
     const {username,email,password} = req.body;
     if(!username || !email || !password)
@@ -44,31 +39,65 @@ router.post('/signup',(req, res) => {
                 return res.status(422).json({error:"Username already exists"})
             }
         })
-        // hashing password
-        bcrypt.hash(password,12)
-        .then(hashedpassword => {
-            const user = new User({
-                username,
-                email,
-                password:hashedpassword,
-                email_verified:true,
-                created_at: Date.now(),
-                updated_at: Date.now()
-            })
-    
-            user.save()
-            .then(user => {
-                res.json({message:"user saved successfully"})
-            })
-            .catch(err => {
-                console.log(err)
-            })
-        })
+
+        const token = jwt.sign({username,email,password},JWT_ACC_Activate,{expiresIn:'45m'});
         
+        // send activation mail using mailgun
+        const data = {
+            from: 'no.reply.picto@gmail.com' ,
+            to: req.body.email,
+            subject: 'Account Activation Link',
+            html:`
+              <p> Welcome to the Pictogramm Fam!!</p>
+              <h5> Click on this <a href="http://localhost:3000/authentication/activate/${token}">Link</a> to activate account</h5>`
+         };
+         mg.messages().send(data, function (error, body) {
+             if(error){
+                 return res.status(402).json({message:err})
+             }
+             console.log(body);
+             return res.json({message:"Email has been sent. Kindly activate your account."})
+         });   
     })
     .catch(err => {
         console.log(err)
     })
+})
+
+
+router.post('/email-activate',(req, res)=>{
+    const {token} = req.body;
+    if(token){
+        jwt.verify(token,JWT_ACC_Activate,function(err,decodedToken){
+            if(err){
+                return res.status(400).json({error:"Incorrect or expired link"})
+            }
+            const {username,email,password} = decodedToken;
+            // hashing password
+            bcrypt.hash(password,12)
+            .then(hashedpassword => {
+               const user = new User({
+                  username,
+                  email,
+                  password:hashedpassword,
+                  email_verified:true,
+                  created_at: Date.now(),
+                  updated_at: Date.now()
+               })
+    
+               user.save()
+               .then(user => {
+                  res.json({message:"user saved successfully"})
+               })
+               .catch(err => {
+                 console.log(err)
+            })
+        })
+        })
+    }
+    else{
+        return res.status(402).json({error:"something went wrong"})
+    }
 })
 
 
@@ -115,15 +144,21 @@ router.post('/reset-password',(req,res)=>{
            user.resetToken = token
            user.expireToken = Date.now()+3600000
            user.save().then((result)=>{
-               transporter.sendMail({
-                   to:user.email,
-                   from:"no-reply@picto.com",
-                   subject:"Password-reset",
-                   html:`
+            const data = {
+                from: 'no.reply.picto@gmail.com',
+                to: user.email,
+                subject: 'Password Reset',
+                html:`
                    <p> you requested for password reset</p>
-                   <h5> Click on this <a href="http://localhost:5000/reset/${token}">Link</a> to reset password</h5>`  
-               })
-               res.json({message:"Check your email"})
+                  <h5> Click on this <a href="http://localhost:3000/reset/${token}">Link</a> to reset password</h5>`
+            };
+            mg.messages().send(data, function (error, body) {
+                if(error){
+                    return res.status(402).json({message:err})
+                }
+                console.log(body);
+                res.json({message:"Check your email to reset password"})
+            });
            })
        })
    })
@@ -142,6 +177,7 @@ router.post('/new-password',(req,res)=>{
             user.password = hashedpassword
             user.resetToken = undefined
             user.expireToken = undefined
+            user.updated_at={time:Date(Date.now())}
             user.save().then((savedUser)=>{
                 res.json({message:"password changed successfully"})
             })
