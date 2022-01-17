@@ -1,5 +1,12 @@
 const FollowRequest = require('../models/followRequest.model.js');
 const User = require('../models/user.js');
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({ 
+    cloud_name: 'pictogramm', 
+    api_key: '863583389655876', 
+    api_secret: 'AW7PNwzxeQCJzfslWkMjfdKssE0',
+    secure: true
+  })
 
 const sendFollowRequest = async (req, res, next) => {
     try{
@@ -144,7 +151,33 @@ const unblockUser = async (req, res, next) => {
 }
 
 
+// const getAllFollowers = async (req, res, next) => {
 
+// }
+
+
+const setProfilePicture = async (req, res, next) => {
+    try{
+        const pic = req.files.pic;
+        cloudinary.uploader.upload(pic.tempFilePath,(err,result)=>{
+            console.log(result);
+            User.findById(req.user._id)
+            .then(user =>{
+                if(!user)
+                {
+                    return res.status(400).json({success: false, message:"User not found"});
+                }
+                // Uploading profile picture
+                user.profilePicture = result.url;
+                return res.json({success: true, message:"Profile picture successfully uploaded"})
+            }).catch(err =>{
+                console.log(err);
+            })
+        })
+    }catch (err){
+        return next(err);
+    }
+}
 
 module.exports = {
     sendFollowRequest,
@@ -152,6 +185,8 @@ module.exports = {
     deleteFollowRequest,
     unfollowUser,
     blockUser,
-    unblockUser
+    unblockUser,
+    setProfilePicture
+    // getAllFollowers
 };
 

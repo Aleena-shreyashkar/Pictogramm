@@ -5,7 +5,8 @@ const {
     deleteFollowRequest,
     unfollowUser,
     blockUser,
-    unblockUser
+    unblockUser,
+    setProfilePicture
     // getAllFollowers
      }  = require("../controller/user.controller.js");
 const router = express.Router();
@@ -32,8 +33,7 @@ router.delete('/block',requireLogin,unblockUser);
 
 // router.get('/followers',requireLogin,getAllFollowers);
 
-
-// router.get('/block',requireLogin,getBlockedUsers);
+router.post('/user/profile',requireLogin,setProfilePicture)
 
 module.exports =router
 

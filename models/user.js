@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
         type: 'string',
         required: true
     },
+    profilePicture:{ 
+        type:String,
+        default:"https://res.cloudinary.com/pictogramm/image/upload/v1642416423/22-223965_no-profile-picture-icon-circle-member-icon-png_m8uzyp.png"
+    },
     resetToken: String,
     expireToken:Date,
     email_verified:{

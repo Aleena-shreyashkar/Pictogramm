@@ -5,6 +5,7 @@ const PORT = 5000
 const {MONGOURI}=require('./config/keys')
 const auth = require('./routes/auth.js')
 const user = require('./routes/user.js')
+const fileupload = require('express-fileupload');
 
 // connecting to MongoDB
 mongoose.connect(MONGOURI)
@@ -16,7 +17,9 @@ mongoose.connection.on('error',(err)=>{
 })
 
 app.use(express.json())
-
+app.use(fileupload({
+    useTempFiles:true
+}))
 app.use(auth)
 app.use(user)
 
