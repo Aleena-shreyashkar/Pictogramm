@@ -203,9 +203,62 @@ const getAllUsers = async (req, res, next) => {
     }
 }
 
-// const getAllFollowers = async (req, res, next) => {
+const getAllFollowers = async (req, res, next) => {
+    try {
+        const userid= req.user._id;
+        const page = req.query.page ? parseInst(req.query.page) : 1
+        const limit = req.query.limit ? parseInt(req.query.limit) : 100
+        const query = {}
+        if (page < 0 || page === 0) {
+            response = { "error": true, "message": "invalid page number, should start with 1" };
+            return res.json(response)
+        }
+        query.page = limit * (page - 1)
+        query.limit = limit
+        User.findById(userid, {}, query, function (err, data) {
+            data = user.followers;
+            // Mongo command to fetch all data from collection.
+            if (err) {
+                response = { "error": true, "message": "Error fetching data" };
+            } else {
+                response = { "success": true, "message": data };
+            }
+            res.json(response);
+        });
 
-// }
+    } catch (err) {
+        return next(err);
+    }
+}
+
+
+const getAllFollowing = async (req, res, next) => {
+    try {
+        const userid= req.user._id;
+        const page = req.query.page ? parseInst(req.query.page) : 1
+        const limit = req.query.limit ? parseInt(req.query.limit) : 100
+        const query = {}
+        if (page < 0 || page === 0) {
+            response = { "error": true, "message": "invalid page number, should start with 1" };
+            return res.json(response)
+        }
+        query.page = limit * (page - 1)
+        query.limit = limit
+        User.findById(userid, {}, query, function (err, data) {
+            data = user.following;
+            // Mongo command to fetch all data from collection.
+            if (err) {
+                response = { "error": true, "message": "Error fetching data" };
+            } else {
+                response = { "success": true, "message": data };
+            }
+            res.json(response);
+        });
+
+    } catch (err) {
+        return next(err);
+    }
+}
 
 const editProfile = async (req, res, next) => {
     try {
@@ -270,6 +323,28 @@ const setProfilePicture = async (req, res, next) => {
     }
 }
 
+
+const getProfilePicture = async (req, res, next) => {
+    try {
+        const req_user = req.user._id;
+        User.findById(req_user)
+            .then((user) => {
+                if (!user) {
+                    return res.status(404).json({ success: false, message: "Not found" })
+                }
+                const userReturn = {
+                    profilePicture: user.profilePicture,
+                }
+                return res.status(200).json({ success: true, message: "Profile Profile returned", profilePic: userReturn })
+            }).catch((err) => {
+                console.error(err)
+            })
+    } catch (err) {
+        return next(err);
+    }
+}
+
+
 module.exports = {
     sendFollowRequest,
     acceptFollowRequest,
@@ -279,8 +354,10 @@ module.exports = {
     unblockUser,
     getUser,
     getAllUsers,
+    getAllFollowers,
+    getAllFollowing,
     editProfile,
-    setProfilePicture
-    // getAllFollowers
+    setProfilePicture,
+    getProfilePicture
 };
 

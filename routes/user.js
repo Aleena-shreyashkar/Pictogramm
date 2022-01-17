@@ -9,8 +9,10 @@ const {
     getUser,
     getAllUsers,
     editProfile,
-    setProfilePicture
-    // getAllFollowers
+    setProfilePicture,
+    getAllFollowers,
+    getAllFollowing,
+    getProfilePicture
      }  = require("../controller/user.controller.js");
 const router = express.Router();
 const requireLogin = require('../middleware/requireLogin.js')
@@ -34,9 +36,13 @@ router.post('/block',requireLogin,blockUser);
 
 router.delete('/block',requireLogin,unblockUser);
 
-// router.get('/followers',requireLogin,getAllFollowers);
+router.get('/followers',requireLogin,getAllFollowers);
+
+router.get('/following',requireLogin,getAllFollowing);
 
 router.post('/user/profile',requireLogin,setProfilePicture)
+
+router.get('/user/profile',requireLogin,getProfilePicture)
 
 module.exports =router
 
