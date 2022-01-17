@@ -12,14 +12,6 @@ const mailgun = require("mailgun-js");
 const DOMAIN = 'sandbox2c4f3404967c42728455654bc7dc7790.mailgun.org';
 const mg = mailgun({apiKey: Mailgun_API_Key, domain: DOMAIN});
 const crypto = require('crypto');
-// const fileupload = require('express-fileupload');
-const cloudinary = require('cloudinary').v2;
-cloudinary.config({ 
-    cloud_name: 'pictogramm', 
-    api_key: '863583389655876', 
-    api_secret: 'AW7PNwzxeQCJzfslWkMjfdKssE0',
-    secure: true
-  })
 
 router.get('/protected',requireLogin,(req, res) => {
     res.send("hello")
