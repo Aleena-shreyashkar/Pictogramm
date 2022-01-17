@@ -6,17 +6,20 @@ const {
     unfollowUser,
     blockUser,
     unblockUser,
+    getUser,
+    getAllUsers,
+    editProfile,
     setProfilePicture
     // getAllFollowers
      }  = require("../controller/user.controller.js");
 const router = express.Router();
 const requireLogin = require('../middleware/requireLogin.js')
 
-// router.get('/users/:id', controller.getUser);
+router.get('/users/:id',getUser);
 
-// router.put('/users/:id',controller.editProfile);
+router.put('/users/:id',requireLogin,editProfile);
 
-// router.get('/users', controller.getAllUsers);
+router.get('/users', getAllUsers);
 
 
 router.post('/following/follow',requireLogin,sendFollowRequest);
