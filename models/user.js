@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     followers:[{ type:ObjectId,ref:"User"}],
     following:[{ type:ObjectId,ref:"User"}],
     followRequests:[{ type:ObjectId,ref:"FollowRequest"}],
+    blockedUsers:[{type:ObjectId,ref:"User"}],
     created_at: {
         time : { type : Date, default: Date.now }
     },

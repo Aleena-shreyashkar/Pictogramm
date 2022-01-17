@@ -84,15 +84,64 @@ const deleteFollowRequest = async (req, res, next) => {
     }
 }
 
-// const unfollowUser = async (req, res, next) => {
-//     try{
-//         const req_id = req.body;
-//         const userid = req.user._id;
+const unfollowUser = async (req, res, next) => {
+    try{
+        const req_id = req.body.unfollowID;
+        const userid = req.user._id;
+        const user = await User.findById(req_id);
+        if(!user || !req_id)
+        {
+            return res.status(400).json({success: false,message:"Invalid request"})
+        }
+        User.findByIdAndUpdate(req_id,{$pull:{follower:userid}},{new:true})
+        User.findByIdAndUpdate(userid,{$pull:{following:req_id}},{new:true})
+        return res.status(200).json({success:true,message:"Unfollowed User successfully"})
+
         
-//     }catch(err){
-//         return next(err);
-//     }
-// }
+    }catch(err){
+        return next(err);
+    }
+}
+
+
+const blockUser = async (req, res, next) => {
+    try{
+        const req_id = req.body.blockID;
+        const userid = req.user._id;
+        const user = await User.findById(req_id);
+        if(!user || !req_id || req_id === userid){
+            return res.status(400).json({success: false, message:"Invalid request"})
+        }
+        User.findByIdAndUpdate(userid,{$push:{blockedUsers:req_id}},{new:true});
+        return res.status(200).json({success:true,message:"User Blocked Successfully"})
+
+    }catch (err){
+        return next(err);
+    }
+}
+
+
+const unblockUser = async (req, res, next) => {
+    try{
+        const req_id = req.body.blockID;
+        const userid = req.user._id;
+        const user = await User.findById(req_id);
+        if(!user || !req_id || req_id === userid){
+            return res.status(400).json({success: false, message:"Invalid request"})
+        }
+        User.findByIdAndUpdate(userid,{$pull:{blockedUsers:req_id}},{new:true})
+        .then(user => {
+            return res.status(200).json({success:true,message:"User unblocked Successfully"})
+        }).catch(err=>{
+            console.log(err)
+            return res.status(500).json({success:false,message:"Somwthing went wrong"})
+        });
+        
+
+    }catch (err){
+        return next(err);
+    }
+}
 
 
 
@@ -101,5 +150,8 @@ module.exports = {
     sendFollowRequest,
     acceptFollowRequest,
     deleteFollowRequest,
+    unfollowUser,
+    blockUser,
+    unblockUser
 };
 

@@ -2,7 +2,11 @@ const express = require('express');
 const {
     sendFollowRequest, 
     acceptFollowRequest, 
-    deleteFollowRequest
+    deleteFollowRequest,
+    unfollowUser,
+    blockUser,
+    unblockUser
+    // getAllFollowers
      }  = require("../controller/user.controller.js");
 const router = express.Router();
 const requireLogin = require('../middleware/requireLogin.js')
@@ -20,11 +24,14 @@ router.put('/followers',requireLogin,acceptFollowRequest);
 
 router.delete('/followers/reject',requireLogin,deleteFollowRequest);
 
-// router.delete('/following',requireLogin,unfollowUser);
+router.delete('/following',requireLogin,unfollowUser);
 
-// router.post('/block',requireLogin,blockUser);
+router.post('/block',requireLogin,blockUser);
 
-// router.delete('/block',requireLogin,unblockUser);
+router.delete('/block',requireLogin,unblockUser);
+
+// router.get('/followers',requireLogin,getAllFollowers);
+
 
 // router.get('/block',requireLogin,getBlockedUsers);
 
