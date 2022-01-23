@@ -4,12 +4,7 @@ const mongoose = require('mongoose');
 const userSchema = require('../models/user')
 mongoose.model("User", userSchema)
 const User = mongoose.model("User");
-cloudinary.config({
-    cloud_name: 'pictogramm',
-    api_key: '863583389655876',
-    api_secret: 'AW7PNwzxeQCJzfslWkMjfdKssE0',
-    secure: true
-})
+
 
 const sendFollowRequest = async (req, res, next) => {
     try {
