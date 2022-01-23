@@ -5,6 +5,7 @@ const PORT = 5000
 const {MONGOURI}=require('./config/keys')
 const auth = require('./routes/auth.js')
 const user = require('./routes/user.js')
+const post = require('./routes/post.route.js')
 const fileupload = require('express-fileupload');
 
 // connecting to MongoDB
@@ -22,6 +23,8 @@ app.use(fileupload({
 }))
 app.use(auth)
 app.use(user)
+app.use(post)
+
 
 app.listen(PORT,()=>{
     console.log('listening on port', PORT);
