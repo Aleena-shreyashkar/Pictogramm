@@ -11,14 +11,8 @@ const postSchema = new mongoose.Schema({
         type:String
     },
     likes: [{type:ObjectId, ref:"User"}],
-    comments:[{
-        text : String, 
-        commentedBy : {type:ObjectId, ref:"User"}
-    }],
-    reply:[{
-        text:String,
-        repliedBy:{type:ObjectId, ref:"User"}
-    }], 
+    comments:[{type:ObjectId, ref:"Comment"}],
+        
     postedBy:{type:ObjectId, ref:"User"},
     
     posted_at:{

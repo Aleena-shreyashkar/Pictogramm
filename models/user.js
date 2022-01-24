@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     following:[{ type:ObjectId,ref:"User"}],
     followRequests:[{ type:ObjectId,ref:"FollowRequest"}],
     blockedUsers:[{type:ObjectId,ref:"User"}],
+    sharedPosts:[{type:ObjectId,ref:"Post"}],
     created_at: {
         time : { type : Date, default: Date.now }
     },
