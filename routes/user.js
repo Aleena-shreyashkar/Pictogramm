@@ -12,7 +12,8 @@ const {
     setProfilePicture,
     getAllFollowers,
     getAllFollowing,
-    getProfilePicture
+    getProfilePicture,
+    suggestProfiles
      }  = require("../controller/user.controller.js");
 const router = express.Router();
 const requireLogin = require('../middleware/requireLogin.js')
@@ -43,6 +44,8 @@ router.get('/following',requireLogin,getAllFollowing);
 router.post('/user/profile',requireLogin,setProfilePicture)
 
 router.get('/user/profile',requireLogin,getProfilePicture)
+
+router.get('/suggestProfiles',requireLogin,suggestProfiles)
 
 module.exports =router
 

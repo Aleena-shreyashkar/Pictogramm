@@ -340,6 +340,32 @@ const getProfilePicture = async (req, res, next) => {
 }
 
 
+const suggestProfiles = async(req, res, next)=>{
+    try{
+        const page = req.query.page ? parseInst(req.query.page) : 1
+        const limit = req.query.limit ? parseInt(req.query.limit) : 20
+        const query = {}
+        if (page < 0 || page === 0) {
+            response = { "error": true, "message": "invalid page number, should start with 1" };
+            return res.json(response)
+        }
+        query.page = limit * (page - 1)
+        query.limit = limit
+        User.find({following:{$in:req.user.following}}, {}, query, function (err, data){
+            if (err) {
+                response = { "error": true, "message": "Error fetching data" };
+            } else {
+                response = { "success": true, "message": data };
+            }
+            res.json(response);
+        }).populate("following","_id username");
+        
+    }catch (err){
+       return next(err);
+    }
+}
+
+
 module.exports = {
     sendFollowRequest,
     acceptFollowRequest,
@@ -353,6 +379,7 @@ module.exports = {
     getAllFollowing,
     editProfile,
     setProfilePicture,
-    getProfilePicture
+    getProfilePicture,
+    suggestProfiles
 };
 
